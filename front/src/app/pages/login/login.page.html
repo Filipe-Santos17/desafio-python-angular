@@ -49,11 +49,12 @@
         <input-component 
           id="password" 
           type="password" 
+          placeholder="sua senha" 
           autocomplete="current-password" 
           [value]="password()"
           (valueChange)="password.set($event)" 
           [invalid]="!!passwordError()" 
-        />
+        ></input-component>
 
         <p *ngIf="passwordError()" class="text-red-500 text-xs mt-1">
           {{ passwordError() }}
@@ -62,10 +63,14 @@
 
       <button 
         type="submit"
-        class="w-full mt-4 h-9 rounded-md bg-indigo-500 text-white font-semibold transition hover:bg-indigo-600"
+        class="w-full mt-4 h-9 rounded-md bg-indigo-500 text-white font-semibold transition hover:bg-indigo-600 cursor-pointer"
       >
         Entrar
       </button>
+
+      <p *ngIf="serverError()" class="text-red-500 text-sm text-center mb-2">
+        {{ serverError() }}
+      </p>
     </form>
   </div>
 </div>

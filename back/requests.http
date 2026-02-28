@@ -7,7 +7,7 @@ Content-Type: application/json
 Authorization: {{authToken}}
 
 {
-  "email": "filipe@newlever.ai",
+  "email": "filipe@dev.ai",
   "password": "senha1234"
 }
 
@@ -19,7 +19,7 @@ Content-Type: application/json
 Authorization: {{authToken}}
 
 {
-  "email": "filipe5@newlever.ai",
+  "email": "filipe@dev.ai",
   "password": "senha1234",
   "name": "filipe"
 }

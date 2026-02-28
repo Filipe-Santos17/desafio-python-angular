@@ -34,7 +34,7 @@ def login():
 
         if not user:
             logger.log(
-                route=str(request.url.path),
+                route=str(request.url),
                 method=request.method,
                 message=f"Login - User not found: {email_user}",
                 level="warning",
@@ -46,7 +46,7 @@ def login():
 
         if not check_password(password_user, hash_password):
             logger.log(
-                route=str(request.url.path),
+                route=str(request.url),
                 method=request.method,
                 message=f"Login - Invalid password: {email_user}",
                 level="warning",
@@ -63,13 +63,13 @@ def login():
         user_clear = clear_user(user)
 
         logger.log(
-            route=str(request.url.path),
+            route=str(request.url),
             method=request.method,
             message=f"Login - Successfully login: {email_user}",
         )
         
         resp = make_response(
-            jsonify({"user": user_clear, "token": token}),
+            jsonify({"user": user_clear, "access_token": token}),
             200
         )
         
@@ -80,7 +80,7 @@ def login():
         raise e
     except Exception as e:
         logger.log(
-            route=str(request.url.path),
+            route=str(request.url),
             method=request.method,
             message=f"Login - Error server login user: {e}",
             level="error",
@@ -100,7 +100,7 @@ def register():
 
         if user:
             logger.log(
-                route=str(request.url.path),
+                route=str(request.url),
                 method=request.method,
                 message=f"Register - User already exists: {email_user}",
                 level="warning",
@@ -117,7 +117,7 @@ def register():
         )
 
         logger.log(
-            route=str(request.url.path),
+            route=str(request.url),
             method=request.method,
             message=f"Register - Successfully registered: {email_user}",
         )
@@ -128,7 +128,7 @@ def register():
         raise e
     except Exception as e:
         logger.log(
-            route=str(request.url.path),
+            route=str(request.url),
             method=request.method,
             message=f"Register - Error server registering user: {e}",
             level="error",

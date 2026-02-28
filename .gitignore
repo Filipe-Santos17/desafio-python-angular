@@ -6,9 +6,12 @@
 /bazel-out
 
 # Node
-/node_modules
+node_modules
 npm-debug.log
 yarn-error.log
+
+# Angular
+.angular
 
 # IDEs and editors
 .idea/
@@ -91,3 +94,6 @@ htmlcov/
 # for more details see https://python-poetry.org/docs/basic-usage/#commit-your-poetrylock-file-to-version-control
 Pipfile.lock 
 poetry.lock
+
+#logs
+*.log

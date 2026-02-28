@@ -2,20 +2,20 @@ FROM node:20-slim AS dev
 
 WORKDIR /app
 
-# Copiar apenas dependências primeiro (melhora cache)
+# Copia dependências primeiro (melhora cache)
 COPY package.json package-lock.json ./
 
-RUN npm i
+RUN npm install
 
-# Copiar restante do projeto
+# Copia restante do projeto
 COPY . .
 
 EXPOSE 4200
 
-# Build produção
 CMD ["npm", "run", "start"]
 
-FROM node:20-slim AS prod
+
+FROM node:20-slim AS build
 
 WORKDIR /app
 
@@ -23,10 +23,23 @@ COPY package.json package-lock.json ./
 
 RUN npm ci --omit=dev
 
-# Copiar restante do projeto
 COPY . .
+
+# Build de produção do Angular
+RUN npm run build
+
+
+FROM node:20-slim AS prod
+
+WORKDIR /app
+
+# Instala apenas servidor estático leve
+RUN npm install -g serve
+
+# Copia build do Angular
+COPY --from=build /app/dist ./dist
 
 EXPOSE 4000
 
-#Conserto depois
-CMD ["nginx", "-g", "daemon off;"] 
+# Serve os arquivos estáticos
+CMD ["serve", "-s", "dist", "-l", "4000"]

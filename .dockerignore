@@ -1,0 +1,55 @@
+# Dependency directories
+node_modules/
+
+# Build outputs
+dist/
+build/
+coverage/
+
+# Environment files
+.env*
+*.log
+
+# Version control
+.git/
+.gitignore
+
+# Docker-related files (optional, as they don't harm but aren't needed in the final image)
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Byte-compiled / optimized / DLL files
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+.venv
+venv
+env
+
+# Distribution / packaging
+.Python
+build
+develop-eggs
+dist
+downloads
+eggs
+parts
+sdist
+var
+*.egg-info
+
+# Editors and OS files
+.DS_Store
+.vscode
+.idea
+
+# Source control
+.git
+.gitignore
+
+# Environment files
+.env
