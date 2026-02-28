@@ -1,0 +1,71 @@
+<div class="flex items-center justify-center min-h-screen bg-gray-50 font-sans">
+  <div class="w-full max-w-md bg-white p-8 rounded-lg shadow-[0_4px_20px_rgba(0,0,0,0.05)]">
+    <div class="text-center mb-6">
+      <h1 class="text-2xl font-bold">
+        Bem vindo de volta
+      </h1>
+      <p class="text-gray-500 text-sm">
+        Preencha seu email e senha para entrar na sua conta
+      </p>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" novalidate>
+      <div class="flex flex-col mb-4">
+        <label-component
+          text="Email"
+          for="email"
+        ></label-component>
+
+        <input-component 
+          id="email" 
+          type="email" 
+          placeholder="m@example.com" 
+          autocomplete="email" 
+          [value]="email()"
+          (valueChange)="email.set($event)" 
+          [invalid]="!!emailError()" 
+        />
+
+        <p *ngIf="emailError()" class="text-red-500 text-xs mt-1">
+          {{ emailError() }}
+        </p>
+      </div>
+
+      <div class="flex flex-col mb-4">
+        <div class="flex justify-between items-center">
+          <label-component
+            text="Senha"
+            for="password"
+          ></label-component>
+
+          <a 
+            href="/login" 
+            class="text-xs text-gray-500 underline hover:text-gray-700"
+          >
+            Esqueceu sua senha?
+          </a>
+        </div>
+
+        <input-component 
+          id="password" 
+          type="password" 
+          autocomplete="current-password" 
+          [value]="password()"
+          (valueChange)="password.set($event)" 
+          [invalid]="!!passwordError()" 
+        />
+
+        <p *ngIf="passwordError()" class="text-red-500 text-xs mt-1">
+          {{ passwordError() }}
+        </p>
+      </div>
+
+      <button 
+        type="submit"
+        class="w-full mt-4 h-9 rounded-md bg-indigo-500 text-white font-semibold transition hover:bg-indigo-600"
+      >
+        Entrar
+      </button>
+    </form>
+  </div>
+</div>

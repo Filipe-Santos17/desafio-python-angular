@@ -1,0 +1,65 @@
+@api_route = http://localhost/api
+@authToken = {{authenticate.response.body.token}}
+
+# @name authenticate
+POST {{api_route}}/auth/login
+Content-Type: application/json
+Authorization: {{authToken}}
+
+{
+  "email": "filipe@newlever.ai",
+  "password": "senha1234"
+}
+
+###
+
+# @name register_user
+POST {{api_route}}/auth/register
+Content-Type: application/json
+Authorization: {{authToken}}
+
+{
+  "email": "filipe5@newlever.ai",
+  "password": "senha1234",
+  "name": "filipe"
+}
+
+### Produtos
+
+# @name select_products
+GET {{api_route}}/products
+Content-Type: application/json
+Authorization: {{authToken}}
+
+###
+
+# @name create_product
+POST {{api_route}}/products
+Content-Type: application/json
+Authorization: {{authToken}}
+
+{
+  "name": "produto",
+  "mark": "nike",
+  "value": 50.0
+}
+
+###
+
+# @name update_product
+PUT {{api_route}}/products/2
+Content-Type: application/json
+Authorization: {{authToken}}
+
+{
+  "name": "produto2",
+  "mark": "amz",
+  "value": 45.0
+}
+
+###
+
+# @name delete_product
+DELETE {{api_route}}/products/2
+Content-Type: application/json
+Authorization: {{authToken}}

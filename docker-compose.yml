@@ -1,0 +1,102 @@
+services:
+  api:
+    container_name: api
+    build:
+      context: ./back
+      target: ${STATE}
+    env_file:
+      - .env
+    ports:
+      - '5000'
+    networks:
+      - challenge-network
+    volumes:
+      - ./back:/app
+    restart: always
+    stop_grace_period: 10s
+
+  worker:
+    container_name: worker
+    build:
+      context: ./back
+    command: python worker.py
+    depends_on:
+      - db
+      - redis
+    networks:
+      - challenge-network
+    volumes:
+      - ./back:/app
+    restart: always
+    stop_grace_period: 10s
+
+  front:
+    container_name: frontend
+    build:
+      context: ./front
+      target: ${STATE}
+    env_file:
+      - .env
+    ports:
+      - '4200'
+    networks:
+      - challenge-network
+    volumes:
+      - ./front:/app
+    restart: always
+    stop_grace_period: 10s
+
+  db:
+    image: postgres:16.10-alpine3.21
+    container_name: db
+    ports:
+      - "5432:5432"
+    networks:
+      - challenge-network
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD_SQL}
+      POSTGRES_USER: ${DATABASE_USER_SQL}
+      POSTGRES_DB: ${DATABASE_NAME_SQL}
+  
+  redis:
+    container_name: redis
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    networks:
+      - challenge-network
+    restart: always
+  
+  caddy:
+    container_name: caddy
+    image: caddy:latest
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    env_file:
+      - .env
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
+      - ./caddy/caddy_data:/data
+      - ./caddy/caddy_config:/config
+    networks:
+      - challenge-network
+    depends_on:
+      - front
+      - api
+
+volumes:
+  postgres_data:
+    driver: local
+  backend:
+  frontend:
+
+networks:
+  challenge-network:
+    driver: bridge

@@ -1,0 +1,93 @@
+### Node
+# Compiled output
+/dist
+/tmp
+/out-tsc
+/bazel-out
+
+# Node
+/node_modules
+npm-debug.log
+yarn-error.log
+
+# IDEs and editors
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/mcp.json
+.history/*
+
+# Miscellaneous
+/.angular/cache
+.sass-cache/
+/connect.lock
+/coverage
+/libpeerconnection.log
+testem.log
+/typings
+__screenshots__/
+
+# System files
+.DS_Store
+Thumbs.db
+
+
+### Python
+
+# Byte-code files
+*.pyc
+__pycache__/
+
+# Distribution / packaging
+.Python
+build/
+dist/
+wheels/
+*.egg-info/
+*.egg
+
+# Virtual environment
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Editors and IDEs
+.idea/  # For PyCharm
+.vscode/ # For VS Code
+*.swp
+*~
+.DS_Store # macOS system files
+
+# Specific to pypi.python.org
+.pypirc
+
+# Unit test coverage
+.coverage
+.pytest_cache/
+htmlcov/
+
+# Environment variables
+.env
+.flaskenv
+
+# IPython Notebook
+.ipynb_checkpoints
+
+# Miscellaneous
+# for more details see https://python-poetry.org/docs/basic-usage/#commit-your-poetrylock-file-to-version-control
+Pipfile.lock 
+poetry.lock

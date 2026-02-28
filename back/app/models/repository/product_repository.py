@@ -1,0 +1,92 @@
+from sqlalchemy import text
+import json
+
+from app.models.database import DBConnection
+from app.models.entities import Product
+
+
+def find_all_products(per_page: int = 100, offset = 1):
+    try:
+        with DBConnection() as db:
+            result = db.execute(
+                text("""
+                    SELECT * FROM products
+                    ORDER BY id ASC
+                    LIMIT :limit OFFSET :offset
+                """),
+                {"limit": per_page, "offset": offset}
+            ).fetchall()
+
+            return [
+                dict(**row._mapping)
+                for row in result
+            ]
+    except Exception as e:
+        raise e
+
+
+def find_product_by_id(product_id: int):
+    try:
+        with DBConnection() as db:
+            result = db.execute(
+                text("SELECT * FROM products WHERE id = :id"),
+                {"id": product_id}
+            ).first()
+
+            if not result:
+                return None
+
+            return Product(**result._mapping)
+    except Exception as e:
+        raise e
+
+
+def delete_product(product_id: int):
+    try:
+        with DBConnection() as db:
+            result = db.execute(
+                text("DELETE FROM products WHERE id = :id"),
+                {"id": product_id}
+            )
+
+            return result.rowcount
+    except Exception as e:
+        raise e
+    
+
+def create_product_job(raw_message: str):
+    try:
+        message = json.loads(raw_message)
+
+        data = message["data"]
+        
+        print(f"aqui {data=}")
+
+        with DBConnection() as db:
+            prod = Product(
+                name=data['name'],
+                mark=data['mark'],
+                value=data['value'],
+            )
+
+            db.add(prod)
+    except Exception as e:
+        raise e
+
+def update_product_job(raw_message: str):
+    message = json.loads(raw_message)
+
+    data = message["data"]
+    
+    with DBConnection() as db:
+        result = db.execute(
+            text("""
+                UPDATE products
+                SET name = :name, mark = :mark, value = :value
+                WHERE id = :id
+            """),
+            data
+        )
+        
+        return result.rowcount
+        

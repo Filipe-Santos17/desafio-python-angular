@@ -1,0 +1,46 @@
+{
+    email ''
+    admin off
+}
+
+{$DNS_DOMAIN} { 
+    encode gzip
+
+    @api path /api/*
+
+    header {
+        X-Forwarded-Proto "https"
+        X-Forwarded-For {remote_host}
+        X-Real-IP {remote_host}
+    }
+
+    header @api {
+        -Server
+        -Via
+
+        Access-Control-Allow-Origin {$DNS_DOMAIN}
+        Access-Control-Allow-Methods "GET,POST,PUT,DELETE,OPTIONS"
+        Access-Control-Allow-Headers "Content-Type, Authorization"
+        Access-Control-Allow-Credentials true
+        Access-Control-Max-Age 600
+
+        Vary "Origin"
+    }
+
+    @preflight {
+        method OPTIONS
+        path /api/*
+    }
+
+    handle @preflight {
+        respond 204
+    }
+
+    handle_path /api/* {
+        reverse_proxy api:5000
+    }
+
+    handle {
+        reverse_proxy front:4200
+    }
+}
