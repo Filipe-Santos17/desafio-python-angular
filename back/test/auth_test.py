@@ -29,12 +29,10 @@ def test_e2e_login_success(mocker):
     )
 
     resp = client.post(
-        "/auth/login", json={"email": fake_user.email, "password": fake_user.password}
+        "/api/auth/login", json={"email": fake_user.email, "password": fake_user.password}
     )
 
     data = resp.get_json()
-
-    print(f"{data=}")
 
     assert resp.status_code == 200
     assert data["success"] is True
@@ -46,7 +44,7 @@ def test_e2e_login_success(mocker):
 def test_e2e_login_user_not_found(mocker):
     mocker.patch("app.routes.auth_routes.find_user_by_email", return_value=None)
 
-    resp = client.post("/auth/login", json={"email": "x@x.com", "password": "12345678"})
+    resp = client.post("/api/auth/login", json={"email": "x@x.com", "password": "12345678"})
 
     data = resp.get_json()
 
@@ -63,7 +61,7 @@ def test_e2e_login_wrong_password(mocker):
     mocker.patch("app.routes.auth_routes.check_password", return_value=False)
 
     resp = client.post(
-        "/auth/login", json={"email": "x@x.com", "password": "wrong1234"}
+        "/api/auth/login", json={"email": "x@x.com", "password": "wrong1234"}
     )
 
     data = resp.get_json()
@@ -79,7 +77,7 @@ def test_e2e_register_success(mocker):
     mocker.patch("app.routes.auth_routes.insert_user")
 
     resp = client.post(
-        "/auth/register",
+        "/api/auth/register",
         json={"email": "novo@teste.com", "name": "Novo", "password": "senha1123"},
     )
 
@@ -97,7 +95,7 @@ def test_e2e_register_user_exists(mocker):
     mocker.patch("app.routes.auth_routes.find_user_by_email", return_value=fake_user)
 
     resp = client.post(
-        "/auth/register",
+        "/api/auth/register",
         json={"email": "existente@teste.com", "name": "User", "password": "senha1123"},
     )
 
@@ -114,6 +112,6 @@ def test_e2e_logoff_success(mocker):
     # mock jwt_required para bypass
     mocker.patch("app.routes.auth_routes.jwt_required", lambda: lambda f: f)
 
-    resp = client.post("/auth/logoff")
+    resp = client.post("/api/auth/logoff")
 
     assert resp.status_code == 200

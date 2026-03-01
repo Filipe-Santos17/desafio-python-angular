@@ -1,10 +1,11 @@
 from flask import jsonify
 from werkzeug.exceptions import HTTPException
 
-def global_error_handler(app):
+def global_error_handler(api):
 
-    @app.errorhandler(HTTPException)
+    @api.errorhandler(HTTPException)
     def handle_http_exception(e):
+
         response = {
             "success": False,
             "error": {
@@ -13,11 +14,12 @@ def global_error_handler(app):
                 "status_code": e.code,
             }
         }
-        
-        return jsonify(response), e.code
 
-    @app.errorhandler(Exception)
+        return response, e.code
+
+    @api.errorhandler(Exception)
     def handle_generic_exception(e):
+
         response = {
             "success": False,
             "error": {
@@ -26,5 +28,5 @@ def global_error_handler(app):
                 "status_code": 500,
             }
         }
-        
-        return jsonify(response), 500
+
+        return response, 500

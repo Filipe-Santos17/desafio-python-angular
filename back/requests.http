@@ -16,7 +16,6 @@ Authorization: {{authToken}}
 # @name register_user
 POST {{api_route}}/auth/register
 Content-Type: application/json
-Authorization: {{authToken}}
 
 {
   "email": "filipe@dev.ai",
@@ -52,7 +51,7 @@ Content-Type: application/json
 Authorization: {{authToken}}
 
 {
-  "name": "produto2",
+  "name": "produto3",
   "mark": "amz",
   "value": 45.0
 }

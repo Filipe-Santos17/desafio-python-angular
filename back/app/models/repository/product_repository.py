@@ -16,10 +16,20 @@ def find_all_products(page: int = 1, limit_per_page: int = 100):
                 {"limit": limit_per_page, "offset": (page - 1) * limit_per_page}
             ).fetchall()
 
-            return [
-                dict(**row._mapping)
-                for row in result
-            ]
+            products = []
+
+            for row in result:
+                data = dict(**row._mapping)
+
+                if data.get("created_at"):
+                    data["created_at"] = data["created_at"].isoformat()
+
+                if data.get("updated_at"):
+                    data["updated_at"] = data["updated_at"].isoformat()
+
+                products.append(data)
+
+            return products
     except Exception as e:
         raise e
 

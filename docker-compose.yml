@@ -4,6 +4,9 @@ services:
     build:
       context: ./back
       target: ${STATE}
+    depends_on:
+      - db
+      - redis
     env_file:
       - .env
     ports:
@@ -20,6 +23,8 @@ services:
     build:
       context: ./back
     command: python worker.py
+    env_file:
+      - .env
     depends_on:
       - db
       - redis
@@ -27,7 +32,6 @@ services:
       - challenge-network
     volumes:
       - ./back:/app
-      - ./back/logs:/var/log/app
     restart: always
     stop_grace_period: 10s
 

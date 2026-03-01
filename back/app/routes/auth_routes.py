@@ -1,5 +1,6 @@
 import logging
-from flask import request, make_response, Blueprint, jsonify
+from flask import request, make_response, jsonify
+from flask_restx import Namespace, Resource, fields
 from werkzeug.exceptions import (
     BadRequest,
     InternalServerError,
@@ -19,142 +20,144 @@ from app.routes.models import LoginSchema, RegisterUser
 from app.utils.random import generate_random_hash
 from app.utils.clear_user import clear_user
 
-auth_routes = Blueprint("auth", __name__, url_prefix="/auth")
+auth_routes = Namespace(
+    "auth",
+    description="Operações de autenticação"
+)
 
 logger = logging.getLogger(__name__)
 
-@auth_routes.post("/login")
-def login():
-    try:
-        login_user = LoginSchema.model_validate(request.json)
+# Models
+login_model = auth_routes.model("LoginRequest", {
+    "email": fields.String(required=True, example="user@email.com"),
+    "password": fields.String(required=True, example="123456")
+})
 
-        email_user = login_user.email
-        password_user = login_user.password
+register_model = auth_routes.model("RegisterRequest", {
+    "name": fields.String(required=True, example="Filipe"),
+    "email": fields.String(required=True, example="user@email.com"),
+    "password": fields.String(required=True, example="123456")
+})
 
-        user = find_user_by_email(email_user)
+user_response_model = auth_routes.model("UserResponse", {
+    "id": fields.Integer(example=1),
+    "name": fields.String(example="Filipe"),
+    "email": fields.String(example="user@email.com")
+})
 
-        if not user:
-            logger.warning(
-                f"Route: {request.url} | Method: {request.method} | "
-                f"User not found: {email_user}"
+login_response_model = auth_routes.model("LoginResponse", {
+    "user": fields.Nested(user_response_model),
+    "access_token": fields.String,
+    "success": fields.Boolean(example=True)
+})
+
+default_response_model = auth_routes.model("DefaultResponse", {
+    "msg": fields.String,
+    "success": fields.Boolean
+})
+
+# Rotas
+@auth_routes.route("/login")
+class Login(Resource):
+    @auth_routes.expect(login_model)
+    @auth_routes.response(200, "Login realizado com sucesso", login_response_model)
+    @auth_routes.response(400, "Email ou senha inválidos")
+    @auth_routes.response(500, "Erro interno do servidor")
+    def post(self):
+        try:
+            login_user = LoginSchema.model_validate(request.json)
+
+            email_user = login_user.email
+            password_user = login_user.password
+
+            user = find_user_by_email(email_user)
+
+            if not user:
+                raise BadRequest("Email ou senha inválidos")
+
+            if not check_password(password_user, user.password):
+                raise BadRequest("Email ou senha inválidos")
+
+            random_code_session = generate_random_hash()
+            token, refresh_token = create_token_for_login_user(
+                user.id, random_code_session
             )
-            raise BadRequest("Email ou senha inválidos")
 
-        hash_password_user = user.password
+            user_clear = clear_user(user)
 
-        if not check_password(password_user, hash_password_user):
-            logger.warning(
-                f"Route: {request.url} | Method: {request.method} | "
-                f"Invalid password for user: {email_user}"
+            resp = make_response(
+                jsonify(
+                    {
+                        "user": user_clear,
+                        "access_token": token,
+                        "success": True,
+                    }
+                ),
+                200,
             )
-            raise BadRequest("Email ou senha inválidos")
 
-        random_code_session = generate_random_hash()
-        id_user = user.id
+            add_token_to_response(resp, refresh_token)
 
-        token, refresh_token = create_token_for_login_user(
-            id_user, random_code_session
-        )
+            return resp
 
-        user_clear = clear_user(user)
+        except HTTPException as e:
+            raise e
+        except Exception as e:
+            logger.error(str(e), exc_info=True)
 
-        logger.info(
-            f"Route: {request.url} | Method: {request.method} | "
-            f"Successfully logged in: {email_user}"
-        )
+            raise InternalServerError("Falha do servidor ao realizar login")
 
-        resp = make_response(
-            jsonify(
-                {
-                    "user": user_clear,
-                    "access_token": token,
-                    "success": True,
-                }
-            ),
-            200,
-        )
+@auth_routes.route("/register")
+class Register(Resource):
+    @auth_routes.expect(register_model)
+    @auth_routes.response(201, "Usuário criado com sucesso", default_response_model)
+    @auth_routes.response(400, "Usuário já existente")
+    @auth_routes.response(500, "Erro interno do servidor")
+    def post(self):
+        try:
+            register_user = RegisterUser.model_validate(request.json)
 
-        add_token_to_response(resp, refresh_token)
+            email_user = register_user.email
 
-        return resp
+            if find_user_by_email(email_user):
+                raise BadRequest("Usuário existente")
 
-    except HTTPException as e:
-        raise e
+            password_hash = hash_password(register_user.password)
 
-    except Exception as e:
-        logger.error(
-            f"Route: {request.url} | Method: {request.method} | "
-            f"Error during login: {e}",
-            exc_info=True,
-        )
-        raise InternalServerError("Falha do servidor ao realizar login")
-
-@auth_routes.post("/register")
-def register():
-    try:
-        register_user = RegisterUser.model_validate(request.json)
-
-        email_user = register_user.email
-
-        user = find_user_by_email(email_user)
-
-        if user:
-            logger.warning(
-                f"Route: {request.url} | Method: {request.method} | "
-                f"User already exists: {email_user}"
+            insert_user(
+                email=email_user,
+                name=register_user.name,
+                password=password_hash,
             )
-            raise BadRequest("Usuário existente")
 
-        password_hash = hash_password(register_user.password)
+            return {"msg": "Usuário criado", "success": True}, 201
 
-        insert_user(
-            email=email_user,
-            name=register_user.name,
-            password=password_hash,
-        )
+        except HTTPException as e:
+            raise e
+        except Exception as e:
+            logger.error(str(e), exc_info=True)
 
-        logger.info(
-            f"Route: {request.url} | Method: {request.method} | "
-            f"Successfully registered: {email_user}"
-        )
+            raise InternalServerError("Falha ao realizar cadastro")
 
-        return {"msg": "Usuário criado", "success": True}, 201
+@auth_routes.route("/logoff")
+class Logoff(Resource):
+    @auth_routes.doc(security="Bearer")
+    @auth_routes.response(200, "Logoff realizado com sucesso", default_response_model)
+    @auth_routes.response(401, "Não autorizado")
+    @auth_routes.response(500, "Erro interno do servidor")
+    @jwt_required()
+    def post(self):
+        try:
+            resp = make_response(
+                jsonify({"msg": "Logoff concluido", "success": True}),
+                200,
+            )
 
-    except HTTPException as e:
-        raise e
+            remove_token(resp)
 
-    except Exception as e:
-        logger.error(
-            f"Route: {request.url} | Method: {request.method} | "
-            f"Error during register: {e}",
-            exc_info=True,
-        )
-        
-        raise InternalServerError("Falha ao realizar cadastro")
+            return resp
 
-@auth_routes.post("/logoff")
-@jwt_required()
-def logoff():
-    try:
-        resp = make_response(
-            jsonify({"msg": "Logoff concluido", "success": True}),
-            200,
-        )
+        except Exception as e:
+            logger.error(str(e), exc_info=True)
 
-        remove_token(resp)
-
-        logger.info(
-            f"Route: {request.url} | Method: {request.method} | "
-            f"User logged off successfully"
-        )
-
-        return resp
-
-    except Exception as e:
-        logger.error(
-            f"Route: {request.url} | Method: {request.method} | "
-            f"Error during logoff: {e}",
-            exc_info=True,
-        )
-        
-        raise InternalServerError("Falha do servidor ao realizar logoff")
+            raise InternalServerError("Falha do servidor ao realizar logoff")

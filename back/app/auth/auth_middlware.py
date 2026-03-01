@@ -22,9 +22,9 @@ def jwt_required(auto_refresh: bool = True):
                 return f(*args, **kwargs)
 
             if not auth_header or not auth_header.startswith("Bearer "):
-                return jsonify({
+                return {
                     "detail": "Credenciais Inválidas"
-                }), 401
+                }, 401
 
             token = auth_header.split(" ")[1]
 
@@ -54,9 +54,9 @@ def jwt_required(auto_refresh: bool = True):
                 # Injeta usuário no contexto global da requisição
                 g.current_user = user_data
             except JWTError:
-                return jsonify({
+                return {
                     "detail": "Credenciais Inválidas"
-                }), 401
+                }, 401
 
             return f(*args, **kwargs)
 

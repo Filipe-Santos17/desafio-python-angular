@@ -36,10 +36,17 @@
         respond 204
     }
 
-    handle_path /api/* {
+    # Swagger Api
+    handle /swaggerui/* {
         reverse_proxy api:5000
     }
 
+    # Api
+    handle /api/* {
+        reverse_proxy api:5000
+    }
+
+    # Front
     handle {
         reverse_proxy front:4200
     }

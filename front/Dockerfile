@@ -14,6 +14,21 @@ EXPOSE 4200
 
 CMD ["npm", "run", "start"]
 
+FROM node:20-slim AS test
+
+WORKDIR /app
+
+# Copia dependências primeiro (melhora cache)
+COPY package.json package-lock.json ./
+
+RUN npm install
+
+# Copia restante do projeto
+COPY . .
+
+EXPOSE 4200
+
+CMD ["npm", "run", "start"]
 
 FROM node:20-slim AS build
 
@@ -27,7 +42,6 @@ COPY . .
 
 # Build de produção do Angular
 RUN npm run build
-
 
 FROM node:20-slim AS prod
 

@@ -27,6 +27,7 @@ RUN chmod -R 777 /var/log/app
 FROM base AS dev
 
 ENV FLASK_ENV=development
+ENV PYTHONPATH=/app
 
 COPY . .
 
@@ -54,15 +55,16 @@ CMD sh ./bin/init.sh
 FROM base AS prod
 
 ENV FLASK_ENV=production
+ENV PYTHONPATH=/app
 
 COPY . .
+
+EXPOSE 5000
+
+RUN chmod +x ./bin/init.sh
 
 # Criar usuário não-root
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 USER appuser
-
-EXPOSE 5000
-
-RUN chmod 777 ./bin/init.sh
 
 CMD sh ./bin/init.sh

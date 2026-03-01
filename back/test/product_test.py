@@ -21,7 +21,7 @@ def test_e2e_list_products_success(mocker):
     # bypass jwt
     mocker.patch("app.routes.product_routes.jwt_required", lambda: lambda f: f)
 
-    resp = client.get("/products?page=1&limit=10")
+    resp = client.get("/api/products?page=1&limit=10")
 
     data = resp.get_json()
 
@@ -36,7 +36,7 @@ def test_e2e_create_product_success(mocker):
     mocker.patch("app.routes.product_routes.jwt_required", lambda: lambda f: f)
 
     resp = client.post(
-        "/products",
+        "/api/products",
         json={
             "name": "Produto Novo",
             "mark": "Marca X",
@@ -57,7 +57,7 @@ def test_e2e_update_product_success(mocker):
     mocker.patch("app.routes.product_routes.jwt_required", lambda: lambda f: f)
 
     resp = client.put(
-        "/products/1",
+        "/api/products/1",
         json={
             "name": "Produto Atualizado",
             "mark": "Marca Y",
@@ -67,8 +67,6 @@ def test_e2e_update_product_success(mocker):
 
     data = resp.get_json()
     
-    print(data)
-
     assert resp.status_code == 202
     assert data["success"] is True
     assert data["message"] == "Atualização enviada para processamento"
@@ -79,18 +77,18 @@ def test_e2e_delete_product_success(mocker):
     mocker.patch("app.routes.product_routes.insert_queue")
     mocker.patch("app.routes.product_routes.jwt_required", lambda: lambda f: f)
 
-    resp = client.delete("/products/1")
+    resp = client.delete("/api/products/1")
 
     data = resp.get_json()
 
     assert resp.status_code == 200
     assert data["success"] is True
-    assert data["message"] == "Atualização enviada para processamento"
+    assert data["message"] == "Remoção enviada para processamento"
 
 
 # LIST PRODUCTS - FAIL WITHOUT TOKEN
 def test_e2e_list_products_without_token():
     api.config["TESTING"] = False
     
-    resp = client.get("/products")
+    resp = client.get("/api/products")
     assert resp.status_code == 401

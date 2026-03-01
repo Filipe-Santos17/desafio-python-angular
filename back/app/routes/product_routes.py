@@ -1,6 +1,7 @@
 import logging
-from flask import Blueprint, request, jsonify
 import json
+from flask import request, jsonify
+from flask_restx import Namespace, Resource, fields
 
 from app.auth import jwt_required
 from app.libs.redis import insert_queue
@@ -12,137 +13,157 @@ from app.models.repository.product_repository import (
     update_product_job,
 )
 
-products_routes = Blueprint(
+products_routes = Namespace(
     "products",
-    __name__,
-    url_prefix="/products"
+    description="Operações de gerenciamento de produtos"
 )
 
 logger = logging.getLogger(__name__)
 
+# Models
+product_request_model = products_routes.model("ProductRequest", {
+    "name": fields.String(required=True, example="Notebook"),
+    "mark": fields.String(required=True, example="Dell"),
+    "value": fields.Float(required=True, example=4500.00)
+})
 
-@products_routes.get("")
-@jwt_required()
-def list_products():
-    try:
-        page = request.args.get("page", default=1, type=int)
-        limit = request.args.get("limit", default=100, type=int)
+product_response_model = products_routes.model("ProductResponse", {
+    "id": fields.Integer(example=1),
+    "name": fields.String(example="Notebook"),
+    "mark": fields.String(example="Dell"),
+    "value": fields.Float(example=4500.00),
+})
 
-        if page < 1:
-            page = 1
+list_response_model = products_routes.model("ListProductsResponse", {
+    "success": fields.Boolean(example=True),
+    "data": fields.List(fields.Nested(product_response_model))
+})
 
-        if limit < 1:
-            limit = 100
+default_response_model = products_routes.model("DefaultResponse", {
+    "success": fields.Boolean(example=True),
+    "message": fields.String(example="Operação realizada com sucesso")
+})
 
-        products = find_all_products(page, limit)
+# Rotas
+@products_routes.route("")
+class ProductList(Resource):
+    @products_routes.doc(security="Bearer")
+    @products_routes.param("page", "Número da página", type=int)
+    @products_routes.param("limit", "Quantidade de registros por página", type=int)
+    @products_routes.response(200, "Lista retornada com sucesso", list_response_model)
+    @products_routes.response(401, "Não autorizado")
+    @jwt_required()
+    def get(self):
+        try:
+            page = request.args.get("page", default=1, type=int)
+            limit = request.args.get("limit", default=100, type=int)
 
-        return jsonify({
-            "success": True,
-            "data": products
-        }), 200
+            page = max(page, 1)
+            limit = max(limit, 1)
 
-    except Exception as e:
-        logger.error(
-            f"Product Get All - Error: {e}",
-            exc_info=True
-        )
-        raise e
+            products = find_all_products(page, limit)
 
+            return {
+                "success": True,
+                "data": products
+            }, 200
 
-@products_routes.post("")
-@jwt_required()
-def create_product():
-    try:
-        product = ProductModel.model_validate(request.json)
+        except Exception as e:
+            logger.error(f"Product Get All - Error: {e}", exc_info=True)
 
-        message = {
-            "operation": "create",
-            "data": {
-                "name": product.name,
-                "mark": product.mark,
-                "value": product.value
+            raise e
+
+    @products_routes.doc(security="Bearer")
+    @products_routes.expect(product_request_model)
+    @products_routes.response(202, "Produto enviado para processamento", default_response_model)
+    @products_routes.response(400, "Erro de validação")
+    @products_routes.response(401, "Não autorizado")
+    @jwt_required()
+    def post(self):
+        try:
+            product = ProductModel.model_validate(request.json)
+
+            message = {
+                "operation": "create",
+                "data": {
+                    "name": product.name,
+                    "mark": product.mark,
+                    "value": product.value
+                }
             }
-        }
 
-        insert_queue(create_product_job, json.dumps(message))
+            insert_queue(create_product_job, json.dumps(message))
 
-        logger.info(
-            f"Create Product - Sent to queue: {product.name}"
-        )
+            logger.info(f"Create Product - Sent to queue: {product.name}")
 
-        return jsonify({
-            "success": True,
-            "message": "Produto enviado para processamento"
-        }), 202
+            return {
+                "success": True,
+                "message": "Produto enviado para processamento"
+            }, 202
 
-    except Exception as e:
-        logger.error(
-            f"Create Product - Error: {e}",
-            exc_info=True
-        )
-        raise e
+        except Exception as e:
+            logger.error(f"Create Product - Error: {e}", exc_info=True)
 
+            raise e
 
-@products_routes.put("/<int:product_id>")
-@jwt_required()
-def update_product(product_id: int):
-    try:
-        product = ProductModel.model_validate(request.json)
+@products_routes.route("/<int:product_id>")
+class ProductDetail(Resource):
+    @products_routes.doc(security="Bearer")
+    @products_routes.expect(product_request_model)
+    @products_routes.response(202, "Atualização enviada para processamento", default_response_model)
+    @products_routes.response(401, "Não autorizado")
+    @jwt_required()
+    def put(self, product_id: int):
+        try:
+            product = ProductModel.model_validate(request.json)
 
-        message = {
-            "operation": "update",
-            "data": {
-                "id": product_id,
-                "name": product.name,
-                "mark": product.mark,
-                "value": product.value,
+            message = {
+                "operation": "update",
+                "data": {
+                    "id": product_id,
+                    "name": product.name,
+                    "mark": product.mark,
+                    "value": product.value,
+                }
             }
-        }
 
-        insert_queue(update_product_job, json.dumps(message))
+            insert_queue(update_product_job, json.dumps(message))
 
-        logger.info(
-            f"Update Product - Sent to queue: {product_id}, {product.name}"
-        )
+            logger.info(f"Update Product - Sent to queue: {product_id}")
 
-        return jsonify({
-            "success": True,
-            "message": "Atualização enviada para processamento"
-        }), 202
+            return {
+                "success": True,
+                "message": "Atualização enviada para processamento"
+            }, 202
 
-    except Exception as e:
-        logger.error(
-            f"Update Product - Error: {e}",
-            exc_info=True
-        )
-        raise e
+        except Exception as e:
+            logger.error(f"Update Product - Error: {e}", exc_info=True)
 
+            raise e
 
-@products_routes.delete("/<int:product_id>")
-@jwt_required()
-def remove_product(product_id: int):
-    try:
-        message = {
-            "operation": "delete",
-            "data": {
-                "id": product_id,
+    @products_routes.doc(security="Bearer")
+    @products_routes.response(200, "Produto enviado para exclusão", default_response_model)
+    @products_routes.response(401, "Não autorizado")
+    @jwt_required()
+    def delete(self, product_id: int):
+        try:
+            message = {
+                "operation": "delete",
+                "data": {
+                    "id": product_id,
+                }
             }
-        }
 
-        insert_queue(delete_product, json.dumps(message))
+            insert_queue(delete_product, json.dumps(message))
 
-        logger.info(
-            f"Delete Product - Sent to queue: {product_id}"
-        )
+            logger.info(f"Delete Product - Sent to queue: {product_id}")
 
-        return jsonify({
-            "success": True,
-            "message": "Atualização enviada para processamento"
-        }), 200
+            return {
+                "success": True,
+                "message": "Remoção enviada para processamento"
+            }, 200
 
-    except Exception as e:
-        logger.error(
-            f"Delete Product - Error: {e}",
-            exc_info=True
-        )
-        raise e
+        except Exception as e:
+            logger.error(f"Delete Product - Error: {e}", exc_info=True)
+            
+            raise e
