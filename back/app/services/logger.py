@@ -44,3 +44,5 @@ class LoggerService:
             self.logger.critical(log_message)
         else:
             self.logger.info(log_message)
+            
+logger = LoggerService()

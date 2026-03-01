@@ -15,7 +15,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
         expire = datetime.now(timezone.utc) + expires_delta
     else:
         expire = datetime.now(timezone.utc) + timedelta(
-            minutes=envs["ACCESS_TOKEN_EXPIRE_MINUTES"] | 15 # 
+            minutes=envs["ACCESS_TOKEN_EXPIRE_MINUTES"] | 15 
         )
         
     to_encode.update({"exp": expire})
@@ -56,20 +56,20 @@ def verify_token(
             algorithms=envs["ALGORITHM"],
         )
         
-        email: str = payload.get("email")
+        id: int = payload.get("id")
         exp: int = payload.get("exp")
         
-        if not email:
-            raise JWTError("Token missing email claim")
+        if not id:
+            raise JWTError("Token missing id claim")
             
         expiration_datetime = datetime.fromtimestamp(exp, tz=timezone.utc)
         
         if token_type == "access" and expiration_datetime < datetime.now(timezone.utc):
             if auto_refresh:
-                # Create a new token 
+                # TODO: Validar aqui - Create a new token 
                 
                 new_token_user = {
-                    "email": email,
+                    "id": id,
                     "exp": datetime.now(timezone.utc) + 
                     timedelta(minutes=envs["ACCESS_TOKEN_EXPIRE_MINUTES"])
                 }

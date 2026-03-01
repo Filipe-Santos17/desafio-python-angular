@@ -1,4 +1,5 @@
 import { tErroRequest } from "../@types";
+import { getToken } from "./token";
 
 type tHttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
@@ -26,6 +27,11 @@ const allowedRoutes = {
         method: "POST",
         hasBody: true,
         route: "auth/register",
+    },
+    "auth-logoff":{
+        method: "POST",
+        hasBody: false,
+        route: "auth/logoff",
     },
     "product-register":{
         method: "POST",
@@ -78,14 +84,12 @@ export async function globalFetch<T, R>(
         }
     }
 
-    if(routeOptions?.headers){
-        const token = localStorage.getItem("acess-token")
+    const token = getToken()
 
-        requestContent.headers = {
-            ...requestContent.headers, 
-            ...routeOptions.headers,
-            Authorization: routeOptions?.includesToken ? `Bearer ${token}` : ''
-        }
+    requestContent.headers = {
+        ...requestContent.headers, 
+        ...routeOptions.headers,
+        Authorization: routeOptions?.includesToken ? `Bearer ${token}` : ''
     }
 
     const baseRoute = 'https://localhost/api/'

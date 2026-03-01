@@ -4,6 +4,7 @@ import json
 from app.models.database import DBConnection
 from app.models.entities import Product
 
+from app.services.logger import logger
 
 def find_all_products(page: int = 1, limit_per_page: int = 100):
     try:
@@ -41,12 +42,16 @@ def find_product_by_id(product_id: int):
         raise e
 
 
-def delete_product(product_id: int):
+def delete_product(raw_message: str):
     try:
+        message = json.loads(raw_message)
+
+        data = message["data"]
+        
         with DBConnection() as db:
             result = db.execute(
                 text("DELETE FROM products WHERE id = :id"),
-                {"id": product_id}
+                {"id": data["id"]}
             )
 
             return result.rowcount
@@ -60,8 +65,6 @@ def create_product_job(raw_message: str):
 
         data = message["data"]
         
-        print(f"aqui {data=}")
-
         with DBConnection() as db:
             prod = Product(
                 name=data['name'],
@@ -74,19 +77,26 @@ def create_product_job(raw_message: str):
         raise e
 
 def update_product_job(raw_message: str):
-    message = json.loads(raw_message)
+    try:
+        message = json.loads(raw_message)
 
-    data = message["data"]
+        data = message["data"]
     
-    with DBConnection() as db:
-        result = db.execute(
-            text("""
-                UPDATE products
-                SET name = :name, mark = :mark, value = :value
-                WHERE id = :id
-            """),
-            data
-        )
+        with DBConnection() as db:
+            result = db.execute(
+                text("""
+                    UPDATE products
+                    SET name = :name, mark = :mark, value = :value
+                    WHERE id = :id
+                """),
+                data
+            )
         
         return result.rowcount
+    except Exception as e:
+        logger.log(
+            route="product",
+            method="PUT",
+            message=f"Update Product - Erro db: {e}",
+        )
         

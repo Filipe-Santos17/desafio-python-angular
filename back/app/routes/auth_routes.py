@@ -5,7 +5,7 @@ from werkzeug.exceptions import (
     HTTPException,
 )  # , UnprocessableEntity
 
-from app.auth import create_token_for_login_user, add_token_to_response
+from app.auth import create_token_for_login_user, add_token_to_response, remove_token, jwt_required
 
 from app.libs.crypto import check_password, hash_password
 
@@ -56,8 +56,10 @@ def login():
 
         random_code_session = generate_random_hash()
 
+        id_user = user.id
+
         token, refresh_token = create_token_for_login_user(
-            email_user, random_code_session
+            id_user, random_code_session
         )
 
         user_clear = clear_user(user)
@@ -69,7 +71,7 @@ def login():
         )
         
         resp = make_response(
-            jsonify({"user": user_clear, "access_token": token}),
+            jsonify({"user": user_clear, "access_token": token, "success": True}),
             200
         )
         
@@ -122,7 +124,7 @@ def register():
             message=f"Register - Successfully registered: {email_user}",
         )
 
-        return {"msg": "Usuário criado"}, 201
+        return {"msg": "Usuário criado", "success": True}, 201
 
     except HTTPException as e:
         raise e
@@ -135,3 +137,28 @@ def register():
         )
 
         raise InternalServerError("Falha ao realizar cadastro")
+
+@auth_routes.post("/logoff")
+@jwt_required()
+def logoff():
+    try:
+        resp = make_response(
+            jsonify({ "msg": "Logoff concluido", "success": True }),
+            200
+        )
+        
+        # TODO: Apagar e salvar token no banco e no redis
+        
+        remove_token(resp)
+        
+        return resp
+    except Exception as e:
+        logger.log(
+            route=str(request.url),
+            method=request.method,
+            message=f"Login - Error server login user: {e}",
+            level="error",
+        )
+
+        raise InternalServerError("Falha do servidor ao realizar login")
+

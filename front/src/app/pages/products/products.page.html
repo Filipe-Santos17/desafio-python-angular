@@ -14,11 +14,21 @@
             Produtos
         </h1>
 
-        <button 
-            (click)="onClickBtnCreate()" 
-            class="w-9 h-9 flex items-center justify-center rounded-md border border-gray-300 text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition cursor-pointer">
-            +
-        </button>
+        <div class="flex items-center gap-2">
+            <button 
+                (click)="onClickBtnCreate()" 
+                class="w-9 h-9 flex items-center justify-center rounded-md border border-gray-300 text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition cursor-pointer"
+            >
+                +
+            </button>
+
+            <button
+                (click)="onLogout()" 
+                class="px-2 h-9 flex items-center justify-center rounded-md border border-gray-300 text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition cursor-pointer"
+            >
+                Logout
+            </button>
+        </div>
     </div>
 </header>
 

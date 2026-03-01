@@ -15,3 +15,16 @@ def add_token_to_response(resp: Response, refresh_token: str):
         samesite="LAX",
         path="/",
     )
+    
+def remove_token(resp: Response):
+    """Adiciona tokens de authenticação ao response, compartilhando credenciais de forma mais segura"""
+
+    resp.set_cookie(
+        key="refresh_token",
+        value="",
+        max_age=0,
+        secure=True,
+        httponly=True,
+        samesite="LAX",
+        path="/",
+    )

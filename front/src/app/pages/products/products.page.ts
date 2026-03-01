@@ -1,5 +1,6 @@
-import { Component, signal } from "@angular/core";
+import { Component, inject, signal } from "@angular/core";
 import { DecimalPipe, DatePipe } from "@angular/common";
+import { Router } from '@angular/router';
 
 import type { tDataProduct, tDeleteProductMsg, tEditProductMsg, tCreateProductMsg } from "../../@types";
 import { globalFetch } from "../../services/global_fetch";
@@ -7,6 +8,8 @@ import { globalFetch } from "../../services/global_fetch";
 import { DeleteModalProduct } from "../../components/common/modais/product/delete/delete-modal-product"
 import { EditModalProduct } from  "../../components/common/modais/product/edit/edit-modal-product"
 import { CreateModalProduct } from  "../../components/common/modais/product/create/create-modal-product"
+import { deleteToken } from "../../services/token";
+
 
 type tProducts = tDataProduct['data']
 type tProduct = tProducts[number]
@@ -25,8 +28,22 @@ export class ProductsPage{
     isEditModalOpen = signal(false)
     isDeleteModalOpen = signal(false)
 
-    ngOnInit(): void {
+    private router = inject(Router);
+
+    ngOnInit() {
         this.loadProducts()
+    }
+
+    onLogout = async () => {
+        try{
+            await globalFetch<any, tDataProduct>("auth-logoff")
+            
+            deleteToken()
+            
+            this.router.navigate(['/login']);
+        } catch(e){
+            console.error(e)
+        }
     }
 
     async loadProducts(){

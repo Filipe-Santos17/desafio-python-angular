@@ -97,3 +97,7 @@ poetry.lock
 
 #logs
 *.log
+
+# caddy
+caddy/caddy_config
+caddy/caddy_data

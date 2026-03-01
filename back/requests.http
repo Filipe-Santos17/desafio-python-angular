@@ -1,5 +1,5 @@
 @api_route = http://localhost/api
-@authToken = {{authenticate.response.body.token}}
+@authToken = Bearer {{authenticate.response.body.access_token}}
 
 # @name authenticate
 POST {{api_route}}/auth/login

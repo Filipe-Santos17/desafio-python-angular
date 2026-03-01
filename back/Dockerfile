@@ -20,6 +20,10 @@ COPY uv.lock pyproject.toml ./
 # Instala dependências no ambiente global
 RUN uv pip install --system .
 
+# Logs
+RUN mkdir -p /var/log/app
+RUN chmod -R 777 /var/log/app
+
 FROM base AS dev
 
 ENV FLASK_ENV=development

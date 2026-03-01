@@ -30,3 +30,18 @@ def insert_user(email: str, name: str, password: str):
             db.add(user)
     except Exception as e:
         raise e
+    
+def find_user_by_id(id: int):
+    try:
+        with DBConnection() as db:
+            selected_user = db.execute(
+                text("SELECT * FROM users WHERE id = :id"),
+                {"id": f"{id}"}
+            ).first()
+        
+            if not selected_user:
+                return None  
+        
+            return User(**selected_user._mapping)
+    except Exception as e:
+        raise e

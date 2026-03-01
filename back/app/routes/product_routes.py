@@ -2,8 +2,11 @@ from flask import Blueprint, request, jsonify
 from werkzeug.exceptions import BadRequest, NotFound
 import json
 
+from app.auth import jwt_required
+
 from app.libs.redis import insert_queue
-from app.services.logger import LoggerService
+
+from app.services.logger import logger
 
 from app.routes.models import ProductModel
 
@@ -20,10 +23,9 @@ products_routes = Blueprint(
     __name__, 
     url_prefix="/products"
 )
-logger = LoggerService()
-
 
 @products_routes.get("")
+@jwt_required()
 def list_products():
     try:
         page = request.args.get("page", default=1, type=int)
@@ -54,11 +56,13 @@ def list_products():
         raise e
     
 @products_routes.post("")
+@jwt_required()
 def create_product():
     try:
         product = ProductModel.model_validate(request.json)
         
         message = {
+            "operation": "create",
             "data": {
                 "name": product.name,
                 "mark": product.mark,
@@ -71,7 +75,7 @@ def create_product():
         logger.log(
             route=str(request.url),
             method=request.method,
-            message=f"Product - Sent to queue: {product.name}",
+            message=f"Create Product - Sent to queue: {product.name}",
         )
 
         return jsonify({
@@ -83,18 +87,20 @@ def create_product():
         logger.log(
             route=str(request.url),
             method=request.method,
-            message=f"Product Create - Error sending to queue: {e}",
+            message=f"Create Product - Error sending to queue: {e}",
             level="error"
         )
         
         raise e
     
 @products_routes.put("/<int:product_id>")
-def update_product(product_id):
+@jwt_required()
+def update_product(product_id: int):
     try:
         product = ProductModel.model_validate(request.json)
 
         message = {
+            "operation": "update",
             "data": {
                 "id": product_id,
                 "name": product.name,
@@ -104,6 +110,12 @@ def update_product(product_id):
         }
 
         insert_queue(update_product_job, json.dumps(message))
+        
+        logger.log(
+            route=str(request.url),
+            method=request.method,
+            message=f"Update Product - Sent to queue: {product_id}, {product.name}",
+        )
 
         return jsonify({
             "success": True,
@@ -114,30 +126,41 @@ def update_product(product_id):
         logger.log(
             route=str(request.url),
             method=request.method,
-            message=f"Product Update - Error sending to queue: {e}",
+            message=f"Update Product - Error sending to queue: {e}",
             level="error"
         )
         
         raise e
     
 @products_routes.delete("/<int:product_id>")
-def remove_product(product_id):
+@jwt_required()
+def remove_product(product_id: int):
     try:
-        product = delete_product(product_id)
+        message = {
+           "operation": "delete",
+           "data": {
+               "id": product_id,
+           }
+        }
 
-        if not product:
-            raise NotFound("Produto não encontrado")
-
+        insert_queue(delete_product, json.dumps(message))
+        
+        logger.log(
+            route=str(request.url),
+            method=request.method,
+            message=f"Delete Product - Sent to queue: {product_id}",
+        )
+        
         return jsonify({
             "success": True,
-            "message": "Produto removido com sucesso"
+            "message": "Atualização enviada para processamento"
         }), 200
 
     except Exception as e:
         logger.log(
             route=str(request.url),
             method=request.method,
-            message=f"Product Delete - Error sending to queue: {e}",
+            message=f"Delete Product - Error sending to queue: {e}",
             level="error"
         )
          

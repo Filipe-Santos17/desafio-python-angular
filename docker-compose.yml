@@ -27,6 +27,7 @@ services:
       - challenge-network
     volumes:
       - ./back:/app
+      - ./back/logs:/var/log/app
     restart: always
     stop_grace_period: 10s
 
