@@ -5,7 +5,7 @@ from app.models.database import DBConnection
 from app.models.entities import Product
 
 
-def find_all_products(per_page: int = 100, offset = 1):
+def find_all_products(page: int = 1, limit_per_page: int = 100):
     try:
         with DBConnection() as db:
             result = db.execute(
@@ -14,7 +14,7 @@ def find_all_products(per_page: int = 100, offset = 1):
                     ORDER BY id ASC
                     LIMIT :limit OFFSET :offset
                 """),
-                {"limit": per_page, "offset": offset}
+                {"limit": limit_per_page, "offset": (page - 1) * limit_per_page}
             ).fetchall()
 
             return [

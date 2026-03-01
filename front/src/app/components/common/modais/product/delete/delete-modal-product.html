@@ -1,0 +1,52 @@
+<div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+
+    <div class="bg-white rounded-lg w-full max-w-lg p-6 shadow-lg">
+
+        <h2 class="text-lg font-semibold mb-4 text-gray-800">
+            Confirmar Exclusão
+        </h2>
+
+        <div class="grid grid-cols-1 gap-4 mb-6">
+
+            <div>
+                <label class="text-sm text-gray-600">ID</label>
+                <input type="text" [value]="product.id" disabled
+                    class="w-full mt-1 border border-gray-300 rounded-md px-3 py-2 bg-gray-100" />
+            </div>
+
+            <div>
+                <label class="text-sm text-gray-600">Nome</label>
+                <input type="text" [value]="product.name" disabled
+                    class="w-full mt-1 border border-gray-300 rounded-md px-3 py-2 bg-gray-100" />
+            </div>
+
+            <div>
+                <label class="text-sm text-gray-600">Marca</label>
+                <input type="text" [value]="product.mark" disabled
+                    class="w-full mt-1 border border-gray-300 rounded-md px-3 py-2 bg-gray-100" />
+            </div>
+
+            <div>
+                <label class="text-sm text-gray-600">Valor</label>
+                <input type="number" [value]="product.value" disabled
+                    class="w-full mt-1 border border-gray-300 rounded-md px-3 py-2 bg-gray-100" />
+            </div>
+
+        </div>
+
+        <div class="flex justify-end gap-3">
+
+            <button (click)="onConfirmDelete()"
+                class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-800 transition cursor-pointer">
+                Deletar
+            </button>
+
+            <button (click)="close.emit()"
+                class="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition cursor-pointer">
+                Cancelar
+            </button>
+
+        </div>
+
+    </div>
+</div>

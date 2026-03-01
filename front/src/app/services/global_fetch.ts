@@ -51,7 +51,7 @@ const allowedRoutes = {
 
 export async function globalFetch<T, R>(
     router: keyof typeof allowedRoutes, 
-    data: T, 
+    data: T | null = null, 
     options?: tOptionsRequest
 ){
     const requestInfo = allowedRoutes[router] || null
@@ -90,7 +90,9 @@ export async function globalFetch<T, R>(
 
     const baseRoute = 'https://localhost/api/'
 
-    const requestRouter = `${baseRoute}${route}${routeOptions.specificId ?? ''}`
+    const id = routeOptions?.specificId
+
+    const requestRouter = `${baseRoute}${route}${id ? `/${id}` : ''}`
 
     const response = await fetch(requestRouter, requestContent);
 

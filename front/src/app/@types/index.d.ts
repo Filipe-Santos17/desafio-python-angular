@@ -17,3 +17,31 @@ export type tDataLogin = {
         updated_at: string,
     }
 }
+
+export type tProduct = {
+    id: number,
+    name: string,
+    mark: string,
+    value: number
+    created_at: string,
+    updated_at: string,
+}
+
+export type tDataProduct = {
+    data: tProduct[],
+    success: true,
+}
+
+export type tProductRes = {
+    data: {
+        message: string,
+        success: true,
+    } 
+    status: number
+}
+
+export type tCreateProductMsg = tProductRes;
+
+export type tDeleteProductMsg = tProductRes;
+
+export type tEditProductMsg = tProductRes;

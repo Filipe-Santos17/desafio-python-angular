@@ -26,7 +26,17 @@ logger = LoggerService()
 @products_routes.get("")
 def list_products():
     try:
-        products = find_all_products()
+        page = request.args.get("page", default=1, type=int)
+        limit = request.args.get("limit", default=100, type=int)
+
+        # alores mínimos válidos
+        if page < 1:
+            page = 1
+
+        if limit < 1:
+            limit = 100
+
+        products = find_all_products(page, limit)
 
         return jsonify({
             "success": True,

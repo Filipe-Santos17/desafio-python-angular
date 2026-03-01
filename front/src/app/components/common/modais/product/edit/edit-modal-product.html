@@ -1,0 +1,66 @@
+<div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+
+    <div class="bg-white rounded-lg w-full max-w-lg p-6 shadow-lg">
+
+        <h2 class="text-lg font-semibold mb-4 text-gray-800">
+            Editar Produto
+        </h2>
+
+        <div class="grid grid-cols-1 gap-4 mb-6">
+
+            <div>
+                <label class="text-sm text-gray-600">ID</label>
+                <input type="text" [value]="product.id" disabled
+                    class="w-full mt-1 border border-gray-300 rounded-md px-3 py-2 bg-gray-100 text-gray-500" />
+            </div>
+
+            <div>
+                <label class="text-sm text-gray-600">Nome</label>
+                <input 
+                    type="text" 
+                    [ngModel]="product.name"
+                    (ngModelChange)="name = $event"
+                    class="w-full mt-1 border border-gray-300 rounded-md px-3 py-2" 
+                />
+            </div>
+
+            <div>
+                <label class="text-sm text-gray-600">Marca</label>
+                <input 
+                    type="text" 
+                    [ngModel]="product.mark"
+                    (ngModelChange)="mark = $event"
+                    class="w-full mt-1 border border-gray-300 rounded-md px-3 py-2" 
+                />
+            </div>
+
+            <div>
+                <label class="text-sm text-gray-600">Valor</label>
+                <input 
+                    type="number" 
+                    [ngModel]="product.value"
+                    (ngModelChange)="value= $event"
+                    class="w-full mt-1 border border-gray-300 rounded-md px-3 py-2" 
+                />
+            </div>
+
+        </div>
+
+        <div class="flex justify-end gap-3">
+
+            <button 
+                (click)="handleSubmit()" 
+                class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition cursor-pointer"
+            >
+                Editar
+            </button>
+
+            <button (click)="close.emit()"
+                class="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition cursor-pointer">
+                Cancelar
+            </button>
+
+        </div>
+
+    </div>
+</div>

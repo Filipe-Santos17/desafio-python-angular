@@ -1,3 +1,123 @@
-<div>
-    <h1>teste</h1>
+<style>
+    .tr-item {
+        border-bottom: 1px solid #00000050;
+    }
+
+    .tr-item:last-child {
+        border-bottom: none;
+    }
+</style>
+
+<header class="bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        <h1 class="text-lg font-semibold text-gray-800">
+            Produtos
+        </h1>
+
+        <button 
+            (click)="onClickBtnCreate()" 
+            class="w-9 h-9 flex items-center justify-center rounded-md border border-gray-300 text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition cursor-pointer">
+            +
+        </button>
+    </div>
+</header>
+
+<div class="p-6 bg-gray-50 min-h-screen">
+    <div class="max-w-7xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+
+        <div class="p-4 border-b border-b-gray-200">
+            <h2 class="text-lg font-semibold text-gray-700">
+                Lista de Produtos
+            </h2>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm text-left text-gray-600">
+                <thead class="bg-gray-100 text-xs uppercase text-gray-500">
+                    <tr>
+                        <th class="px-6 py-3">ID</th>
+                        <th class="px-6 py-3">Nome</th>
+                        <th class="px-6 py-3">Marca</th>
+                        <th class="px-6 py-3">Valor</th>
+                        <th class="px-6 py-3">Criado em</th>
+                        <th class="px-6 py-3">Atualizado em</th>
+                        <th class="px-6 py-3 text-center">Ações</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @if (dataTableProducts().length) {
+                        @for (product of dataTableProducts(); track product) {
+                            <tr class="hover:bg-gray-50 transition tr-item">
+                                <td class="px-6 py-4 font-medium text-gray-900">
+                                    {{ product.id }}
+                                </td>
+
+                                <td class="px-6 py-4">
+                                    {{ product.name }}
+                                </td>
+
+                                <td class="px-6 py-4">
+                                    {{ product.mark }}
+                                </td>
+
+                                <td class="px-6 py-4">
+                                    R$ {{ product.value | number:'1.2-2' }}
+                                </td>
+
+                                <td class="px-6 py-4">
+                                    {{ product.created_at | date:'dd/MM/yyyy HH:mm' }}
+                                </td>
+
+                                <td class="px-6 py-4">
+                                    {{ product.updated_at | date:'dd/MM/yyyy HH:mm' }}
+                                </td>
+
+                                <td class="px-6 py-4 flex gap-2 justify-center">
+                                    <button (click)="onClickBtnEdit(product)"
+                                        class="px-3 py-1 text-xs font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 transition cursor-pointer">
+                                        Editar
+                                    </button>
+
+                                    <button (click)="onClickBtnDelete(product.id)"
+                                        class="px-3 py-1 text-xs font-medium text-white bg-red-500 rounded-md hover:bg-red-600 transition cursor-pointer">
+                                        Deletar
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    } @else {
+                        <tr>
+                            <td colspan="7" class="text-center py-6 text-gray-400">
+                                Nenhum produto encontrado
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
+
+@if(isCreateModalOpen()){
+    <create-modal-product
+        [onConfirmCreate]="handleCreate"
+        (close)="closeModals()"
+    ></create-modal-product>
+}
+
+@if(isEditModalOpen()){
+    <edit-modal-product
+        [onConfirmEdit]="handleEdit"
+        [product]="selectedProduct()"
+        (close)="closeModals()"
+    ></edit-modal-product>
+}
+
+@if(isDeleteModalOpen()){
+    <delete-modal-product
+        [onConfirmDelete]="handleDelete"
+        [product]="selectedProduct()"
+        (close)="closeModals()"
+    ></delete-modal-product>
+}
