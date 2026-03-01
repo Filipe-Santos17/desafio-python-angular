@@ -28,18 +28,33 @@ FROM base AS dev
 
 ENV FLASK_ENV=development
 
-# Copia aplicação
 COPY . .
 
 EXPOSE 5000
 
-CMD ["python", "app.py"]
+RUN chmod 777 ./bin/init.sh
+
+CMD sh ./bin/init.sh
+
+FROM base AS test
+
+ENV FLASK_ENV=test
+ENV PYTHONPATH=/app
+
+RUN uv pip install --system . --group dev
+
+COPY . .
+
+EXPOSE 5000
+
+RUN chmod 777 ./bin/init.sh
+
+CMD sh ./bin/init.sh
 
 FROM base AS prod
 
 ENV FLASK_ENV=production
 
-# Copia aplicação
 COPY . .
 
 # Criar usuário não-root
@@ -48,4 +63,6 @@ USER appuser
 
 EXPOSE 5000
 
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "app:app"]
+RUN chmod 777 ./bin/init.sh
+
+CMD sh ./bin/init.sh

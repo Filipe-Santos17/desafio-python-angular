@@ -52,7 +52,7 @@ export class ProductsPage{
 
             this.dataTableProducts.set(data.data)
         } catch(e){
-
+            console.error(e)
         }
     }
 
@@ -108,7 +108,7 @@ export class ProductsPage{
 
             this.dataTableProducts.set(newProducts)
         } catch (e){
-
+            console.error(e)
         }
     }
 

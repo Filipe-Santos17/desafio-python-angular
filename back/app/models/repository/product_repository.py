@@ -4,8 +4,6 @@ import json
 from app.models.database import DBConnection
 from app.models.entities import Product
 
-from app.services.logger import logger
-
 def find_all_products(page: int = 1, limit_per_page: int = 100):
     try:
         with DBConnection() as db:
@@ -94,9 +92,5 @@ def update_product_job(raw_message: str):
         
         return result.rowcount
     except Exception as e:
-        logger.log(
-            route="product",
-            method="PUT",
-            message=f"Update Product - Erro db: {e}",
-        )
+        raise e
         

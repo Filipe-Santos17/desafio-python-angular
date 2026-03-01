@@ -11,11 +11,9 @@ from app.envs import envs
 # access to the values within the .ini file in use.
 config = context.config
 
-local = "localhost" if envs['ENVIRONMENT'] == "dev" else "db"
-
 config.set_main_option(
     "sqlalchemy.url",
-    f"postgresql+psycopg2://{envs['DATABASE_USER_SQL']}:{envs['DATABASE_PASSWORD_SQL']}@{local}:5432/{envs['DATABASE_NAME_SQL']}"
+    f"postgresql+psycopg2://{envs['DATABASE_USER_SQL']}:{envs['DATABASE_PASSWORD_SQL']}@db:5432/{envs['DATABASE_NAME_SQL']}"
 )
 
 # Interpret the config file for Python logging.
