@@ -12,7 +12,6 @@ type tRoute = {
 type tAllowedRoutes = Record<string, tRoute>
 
 type tOptionsRequest = {
-    includesToken?: boolean,
     specificId?: number | string,
     headers?: RequestInit['headers'], 
 }
@@ -66,7 +65,6 @@ export async function globalFetch<T, R>(
 
     const routeOptions = options || {
         headers: null,
-        includesToken: true,
         specificId: null
     }
 
@@ -89,7 +87,7 @@ export async function globalFetch<T, R>(
     requestContent.headers = {
         ...requestContent.headers, 
         ...routeOptions.headers,
-        Authorization: routeOptions?.includesToken ? `Bearer ${token}` : ''
+        Authorization: token ? `Bearer ${token}` : ''
     }
 
     const baseRoute = 'https://localhost/api/'
