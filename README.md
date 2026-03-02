@@ -12,7 +12,7 @@ Funcionalmente, o sistema deve ter:
 - [x] Tela protegida com CRUD de produtos
 - [x] A tela de produtos no frontend não pode ser acessada sem estar logado e frontend deve bloquear o acesso via Route Guard.
 - [x] Processar continuamente a fila com operações de insert, update e delete passando por fila no Redis e sendo aplicadas no banco por um worker.
-- [x] - Registrar logs básicos das operações processadas (por exemplo: tipo de operação e ID do
+- [x] Registrar logs básicos das operações processadas (por exemplo: tipo de operação e ID do
 produto).
 - [x] Todos os endpoints de /products devem exigir token válido
 - [x] Montar uma mensagem com: operação (create, update, delete) e dados do produto (ou ID, no caso de delete)
