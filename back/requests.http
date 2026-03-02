@@ -4,7 +4,6 @@
 # @name authenticate
 POST {{api_route}}/auth/login
 Content-Type: application/json
-Authorization: {{authToken}}
 
 {
   "email": "filipe@dev.ai",

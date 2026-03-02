@@ -2,6 +2,11 @@ import logging
 import json
 from flask import request, jsonify
 from flask_restx import Namespace, Resource, fields
+from werkzeug.exceptions import (
+    BadRequest,
+    InternalServerError,
+    HTTPException,
+)
 
 from app.auth import jwt_required
 from app.libs.redis import insert_queue
@@ -68,10 +73,12 @@ class ProductList(Resource):
                 "data": products
             }, 200
 
+        except HTTPException as e:
+            raise e
         except Exception as e:
             logger.error(f"Product Get All - Error: {e}", exc_info=True)
 
-            raise e
+            raise InternalServerError("Falha do servidor ao selecionar produtos")
 
     @products_routes.doc(security="Bearer")
     @products_routes.expect(product_request_model)
@@ -81,7 +88,10 @@ class ProductList(Resource):
     @jwt_required()
     def post(self):
         try:
-            product = ProductModel.model_validate(request.json)
+            product = ProductModel.safe_validate(request.json)
+
+            if not product:
+                raise BadRequest("Dados inválidos/incompletos")
 
             message = {
                 "operation": "create",
@@ -101,10 +111,13 @@ class ProductList(Resource):
                 "message": "Produto enviado para processamento"
             }, 202
 
+        except HTTPException as e:
+            raise e
         except Exception as e:
             logger.error(f"Create Product - Error: {e}", exc_info=True)
 
-            raise e
+            raise InternalServerError("Falha do servidor ao postar produto")
+
 
 @products_routes.route("/<int:product_id>")
 class ProductDetail(Resource):
@@ -115,7 +128,10 @@ class ProductDetail(Resource):
     @jwt_required()
     def put(self, product_id: int):
         try:
-            product = ProductModel.model_validate(request.json)
+            product = ProductModel.safe_validate(request.json)
+
+            if not product:
+                raise BadRequest("Dados inválidos/incompletos")
 
             message = {
                 "operation": "update",
@@ -136,10 +152,12 @@ class ProductDetail(Resource):
                 "message": "Atualização enviada para processamento"
             }, 202
 
+        except HTTPException as e:
+            raise e
         except Exception as e:
             logger.error(f"Update Product - Error: {e}", exc_info=True)
 
-            raise e
+            raise InternalServerError("Falha do servidor ao atualizar produto")
 
     @products_routes.doc(security="Bearer")
     @products_routes.response(200, "Produto enviado para exclusão", default_response_model)
@@ -162,8 +180,10 @@ class ProductDetail(Resource):
                 "success": True,
                 "message": "Remoção enviada para processamento"
             }, 200
-
+        
+        except HTTPException as e:
+            raise e
         except Exception as e:
             logger.error(f"Delete Product - Error: {e}", exc_info=True)
             
-            raise e
+            raise InternalServerError("Falha do servidor ao deletar produto")

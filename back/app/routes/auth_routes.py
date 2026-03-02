@@ -65,7 +65,10 @@ class Login(Resource):
     @auth_routes.response(500, "Erro interno do servidor")
     def post(self):
         try:
-            login_user = LoginSchema.model_validate(request.json)
+            login_user = LoginSchema.safe_validate(request.json)
+
+            if not login_user:
+                raise BadRequest("Dados inválidos/incompletos")
 
             email_user = login_user.email
             password_user = login_user.password
@@ -115,7 +118,10 @@ class Register(Resource):
     @auth_routes.response(500, "Erro interno do servidor")
     def post(self):
         try:
-            register_user = RegisterUser.model_validate(request.json)
+            register_user = RegisterUser.safe_validate(request.json)
+
+            if not register_user:
+                raise BadRequest("Dados inválidos/incompletos")
 
             email_user = register_user.email
 

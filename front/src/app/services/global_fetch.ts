@@ -1,5 +1,5 @@
 import { tErroRequest } from "../@types";
-import { getToken } from "./token";
+import { getToken, deleteToken } from "./token";
 
 type tHttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
@@ -101,6 +101,14 @@ export async function globalFetch<T, R>(
     const response = await fetch(requestRouter, requestContent);
 
     if (!response.ok) {
+        if (response.status === 401) {
+            deleteToken()
+            
+            window.location.href = '/login';
+
+            throw new Error('Sessão expirada');
+        }
+
         const errorData = await response.json() as tErroRequest;
 
         const formattedMessage = `${errorData.error.message} - ${errorData.error.type}`;

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, field_validator, Field
+from pydantic import BaseModel, EmailStr, field_validator, Field, ValidationError
 
 class EmailSchema(BaseModel):
     email: EmailStr
@@ -17,9 +17,23 @@ class LoginSchema(EmailSchema):
             raise ValueError("Senha deve ter pelo menos 8 caracteres")
         return v
 
+    @classmethod
+    def safe_validate(cls, data: dict):
+        try:
+            return cls.model_validate(data)
+        except ValidationError:
+            return False
+
 class RegisterUser(EmailSchema):
     password: str = Field(min_length=8)
     name: str
+
+    @classmethod
+    def safe_validate(cls, data: dict):
+        try:
+            return cls.model_validate(data)
+        except ValidationError:
+            return False
     
 class ProductModel(BaseModel):
     name: str
@@ -31,4 +45,11 @@ class ProductModel(BaseModel):
         if len(v.strip()) < 1:
             raise ValueError("name e mark devem ter mais de 1 caracter")
         return v
+
+    @classmethod
+    def safe_validate(cls, data: dict):
+        try:
+            return cls.model_validate(data)
+        except ValidationError:
+            return False
 

@@ -26,7 +26,7 @@ produto).
 Diferenciais:
 - [x] Testes automatizados no backend.
 - [x] Uso de Docker / Docker Compose para subir todos os serviços.
-- [ ] Documentação de API (por exemplo, Swagger/OpenAPI).
+- [x] Documentação de API (por exemplo, Swagger/OpenAPI).
 - [x] Boas práticas de segurança (hash de senha, expiração de token, etc.).
 
 ## 2. Estrutura de pastas do projeto
